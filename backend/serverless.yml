@@ -1,0 +1,139 @@
+# serverless.yml
+# The Serverless Framework automatically looks for a file named serverless.yml in my project root.
+# Without this file, Serverless Framework won't know how to deploy my project.
+# Full-Stack Serverless REST API for Product Inventory Manager
+service: product-inventory-api # Name of my Serverless service/project
+frameworkVersion: '3' # Ensure this Serverless config is compatible with version 3 of the Serverless Framework.
+
+plugins: # Adds extra functionality
+  - serverless-offline # Lets us run the API locally for testing with "npm serverless offline"
+
+# Define custom variables for stage-specific configuration
+custom:
+  # custom.stage: Dynamically sets the deployment stage (dev or prod)
+  # Sets the stage variable based on CLI option or defaults to 'dev'
+  # Uses ${opt:stage} if we pass --stage when deploying, otherwise defaults to ${self:provider.stage}
+  stage: ${opt:stage, self:provider.stage} 
+  stageConfig: # Defines environment specific variables
+    dev: # Uses a DynamicDB table ProductsTable-dev and allows all origins (*) for CORS (Cross-Origin Resource Sharing)
+      TABLE_NAME: ProductsTable-dev
+      CORS_ORIGIN: '*' # Allow all for development
+    prod: # Uses ProductsTable-prod and restricts CORS to my production frontend URL.
+      TABLE_NAME: ProductsTable-prod
+      CORS_ORIGIN: 'https://your.production.frontend.url' # <-- MUST update for prod
+  
+  # Reference the appropriate configuration block based on the current stage
+  environment: ${self:custom.stageConfig.${self:custom.stage}} # Picks the config for the current stage (dev or prod)
+
+provider: # AWS Settings
+  name: aws #AWS is the cloud provider
+  runtime: nodejs20.x # Node.js 20 runtime for Lambda
+  stage: ${opt:stage, 'dev'} # Deployment stage (Default stage is dev) 
+  region: us-east-1 # AWS region to deploy in
+  apiGateway: # API Gateway settings
+    minimumCompressionSize: 1024 # Compresses responses larger than 1 KB. Enabled for improved latency
+    shouldStartNameWithService: true # Names API Gateway using the service name
+  
+  # Grants the Lambda functions IAM permission to interact with the DynamoDB table for:
+  # 1. GetItem
+  # 2. PutItem
+  # 3. UpdateItem
+  # 4. DeleteItem
+  # 5. Scan
+  # 6. Query
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+            - dynamodb:Query
+          Resource: # Resolves to the table name depending on the stage
+            - "arn:aws:dynamodb:${self:provider.region}:#{AWS::AccountId}:table/${self:custom.environment.TABLE_NAME}"
+  environment: 
+  # Environment variables are available inside the Lambda functions
+  # Pass the table name and CORS origin to the Lambda Handlers
+    PRODUCTS_TABLE: ${self:custom.environment.TABLE_NAME} # DynamoDB table name
+    CORS_ORIGIN: ${self:custom.environment.CORS_ORIGIN} # The allowed CORS origin
+    
+  logs: # Enables logging for API Gateway requests
+    restApi: true
+
+# Defines Lambda functions and HTTP events
+functions:
+  createProduct: # createProduct is triggered by a POST request to /products
+    handler: handler.createProduct # Points to my function code in handler.js
+    events: # Defines triggers for the Lambda
+      - http:
+          path: products
+          method: post
+          cors: true # enables cross-origin requests. Automatically adds CORS headers
+
+  getProducts: # handles GET requests for all products and individual products by ID
+    handler: handler.getProducts
+    # In Serverless Framework, any function with events: -http: automatically creates
+    # an API Gateway
+    events: 
+      - http: # API Gateway is automatically created for these Lambda functions
+          path: products
+          method: get
+          cors: true
+      - http:
+          path: products/{id}
+          method: get
+          cors: true
+
+  updateProduct:
+    handler: handler.updateProduct
+    events:
+      - http:
+          path: products/{id}
+          method: put
+          cors: true
+
+  deleteProduct:
+    handler: handler.deleteProduct
+    events:
+      - http:
+          path: products/{id}
+          method: delete
+          cors: true
+
+
+# DynamoDB resource
+# CloudFormation Resources block to define the DynamoDB table
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table # Creates a DynamoDB table using CloudFormation
+      Properties:
+        TableName: ${self:custom.environment.TABLE_NAME}
+        AttributeDefinitions: 
+          - AttributeName: id # Table has a primary key id (string)
+            AttributeType: S # String type for Partition Key
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH # Partition Key
+        # Using On-Demand Capacity for cost-effectiveness and scalability
+        BillingMode: PAY_PER_REQUEST # serverless scaling, no fixed read/write capacity.
+        # Important: Allow CloudFormation to retain the table data if the stack is deleted.
+        DeletionPolicy: Retain # Table won't be deleted if the stack is removed.
+
+# Output the API endpoint (API Gateway URL) after deployment for the frontend to consume
+outputs:
+  ServiceEndpoint:
+    Description: "API Gateway Endpoint URL for the service"
+    Value:
+      Fn::Join:
+        - ''
+        - - "https://"
+          - Ref: ApiGatewayRestApi
+          - ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"
+  # Outputs the DynamoDB table name
+  ProductsTableName:
+    Description: "Products DynamoDB table name"
+    Value: ${self:custom.environment.TABLE_NAME}

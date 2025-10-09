@@ -5,17 +5,14 @@ app: product-inventory-api
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: product-inventory-manager
 
-stages:
-  default:
-    params:
-      tableName: "users-table-${sls:stage}"
-
 provider:
   name: aws
   runtime: nodejs20.x
-  # Uncomment to easily set up a custom domain. Read the docs for more details:
-  # https://www.serverless.com/framework/docs/providers/aws/guide/domains
-  # domain: api.example.com
+  stage: ${opt:stage}, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    PRODUCTS_TABLE: ${self:service}-products-${self:provider.stage}
+    STAGE: ${self:provider.stage}
   iam:
     role:
       statements:
@@ -28,26 +25,27 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [UsersTable, Arn]
-  environment:
-    USERS_TABLE: ${param:tableName}
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}
 
 functions:
   api:
-    handler: handler.handler
+    handler: src/index.handler
     events:
       - httpApi: "*"
 
 resources:
   Resources:
-    UsersTable:
+    ProductsTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        TableName: ${param:tableName}
+        TableName: ${self:provider.environment.PRODUCTS_TABLE}
+
+plugins:
+  - serverless-offline

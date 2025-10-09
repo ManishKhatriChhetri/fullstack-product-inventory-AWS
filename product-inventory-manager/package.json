@@ -1,11 +1,14 @@
 {
   "name": "product-inventory-manager",
   "version": "1.0.0",
-  "description": "",
+  "description": "Serverless Product Inventory Management API with Express",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.585.0",
     "@aws-sdk/lib-dynamodb": "^3.585.0",
     "express": "^4.19.2",
     "serverless-http": "^3.2.0"
-  }
+  },
+  "author": "Manish Khatri Chhetri",
+  "license": "MIT"
+
 }

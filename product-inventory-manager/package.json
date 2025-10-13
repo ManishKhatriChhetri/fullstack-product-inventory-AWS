@@ -2,6 +2,7 @@
   "name": "product-inventory-manager",
   "version": "1.0.0",
   "description": "Serverless Product Inventory Management API with Express",
+  "main": "src/index.js",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.585.0",
     "@aws-sdk/lib-dynamodb": "^3.585.0",

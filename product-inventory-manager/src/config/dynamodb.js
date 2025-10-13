@@ -32,17 +32,17 @@ const dynamoDB = {
         return await documentClient.send(command);
     },
 
-    async update(){
+    async update(params){
         const command = new UpdateCommand(params);
         return await documentClient.send(command);
     },
 
-    async delete(){
+    async delete(params){
         const command = new DeleteCommand(params);
         return await documentClient.send(command);
     },
 
-    async scan(){
+    async scan(params){
         const command = new ScanCommand(params);
         return await documentClient.send(command);
     }

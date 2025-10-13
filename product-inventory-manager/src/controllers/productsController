@@ -1,19 +1,229 @@
-exports.listProducts = async (req, res) => {
+const {v4: uuidv4} = require('uuid');
+const dynamoDB = require('../config/dynamodb');
 
-}
-
+//Create a new product
 exports.createProduct = async (req, res) => {
+    try {
+        const {name, description, price, quantity, category, sku} = req.body;
+    
+        //Validate required fields
+        if(!name || !price || quantity === undefined) {
+            return res.status(400).json({
+                error: 'Missing required fields: name, price, quantity'
+            });
+        }
+
+        const timestamp = new Date().toISOString();
+        const product = {
+            id: uuidv4(),
+            name,
+            description: description || '',
+            price: parseFloat(price),
+            quantity: parseInt(quantity),
+            category: category || 'General',
+            sku: sku || `SKU-${Date.now()}`,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+        }
+        
+        await dynamoDB.put({
+            TableName: process.env.PRODUCTS_TABLE,
+            Item: product,
+        });
+
+        res.status(201).json({
+            message: 'Product created successfully!',
+            product,
+        })
+    } catch (error) {
+        console.error('Error creating product', error)
+        res.status(500).json({
+            error: 'Could not create product',
+            details: error.message,
+        });
+    }
     
 }
 
+//List all products
+exports.listProducts = async (req, res) => {
+    try {
+        const result = await dynamoDB.scan({
+            TableName: process.env.PRODUCTS_TABLE,
+        });
+
+        //Sorting newest items first
+        const products = result.Items.sort( 
+            (a,b) => {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+        );
+
+        res.status(200).json({
+            products,
+            count: products.length,
+        })
+
+    } catch(error) {
+        console.error('Error listing all products', error);
+        res.status(500).json({
+            error: 'Could not list all products',
+            details: error.message,
+        });
+    }
+
+}
+
 exports.getProductById = async (req, res) => {
+
+    try {
+        const {id} = req.params;
+
+        if(!id) {
+            return res.status(400).json({
+                error: 'Product ID is required'
+            });
+        }
+
+        const result = await dynamoDB.get({
+            TableName: process.env.PRODUCTS_TABLE,
+            Key: {id}, 
+        });
+
+        if(!result.Item){
+            return res.status(404).json({
+                error: 'Product not found'
+            });
+        }
+
+        res.status(200).json({
+            product: result.Item,
+        });
+
+    } catch (error) {
+        console.error('Error getting product', error);
+        res.status(500).json({
+            error: 'Could not retrieve product',
+            details: error.message
+        });
+    }
     
 }
 
 exports.updateProduct = async (req, res) => {
-    
+    try {
+
+        const {id} = req.params;
+        const data = req.body;
+
+        //Check if ID is provided
+        if(!id){
+            return res.status(400).json({
+                error: 'Product ID is required',
+            });
+        }
+
+        //Check if Product exists
+        const existingProduct = await dynamoDB.get({
+            TableName: process.env.PRODUCTS_TABLE,
+            Key: {id}
+        });
+
+        if(!existingProduct.Item){
+            return res.status(404).json({
+                error: 'Product NOT found',
+            });
+        }
+
+        //Build update expression dynamically
+        const updateExpressions = [];
+        const expressionAttributeNames = {};
+        const expressionAttributeValues = {};
+
+        const allowedFields = ['name', 'description', 'price', 'quantity', 'category', 'sku'];
+
+        allowedFields.forEach(field=>{
+            if(data[field] !== undefined){
+                updateExpressions.push(`#${field} = :${field}`);
+                expressionAttributeNames[`#${field}`] = field;
+
+                if(field === 'price'){
+                    expressionAttributeValues[`:${field}`] = parseFloat(data[field]);
+                } else if (field === 'quantity') {
+                    expressionAttributeValues[`:${field}`] = parseInt(data[field]);
+                } else {
+                    expressionAttributeValues[`:${field}`] = data[field];
+                }
+            }
+        });
+
+        updateExpressions.push(`#updatedAt = :updatedAt`);
+        expressionAttributeNames['#updatedAt'] = 'updatedAt';
+        expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+
+        const result = await dynamoDB.update({
+            TableName: process.env.PRODUCTS_TABLE,
+            Key: {id},
+            UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+            ExpressionAttributeNames: expressionAttributeNames,
+            ExpressionAttributeValues: expressionAttributeValues,
+            ReturnValues: 'ALL_NEW',
+        });
+
+        res.status(200).json({
+            message: 'Product updated successfully!',
+            product: result.Attributes,
+        });
+
+    } catch (error) {
+        console.error('Error updating product', error);
+        res.status(500).json({
+            error: 'Could not update product',
+            details: error.message,
+        });
+    }
 }
 
 exports.deleteProductById = async (req, res) => {
-    
+    try {
+
+        const {id} = req.params;
+
+        if(!id) {
+            return res.status(400).json({
+                error: 'Product ID is required'
+            });
+        }
+
+        //Check existing product before deleting
+        const existingProduct = await dynamoDB.get({
+            TableName: process.env.PRODUCTS_TABLE,
+            Key: {id}
+        });
+
+        
+        if(!existingProduct.Item) {
+            return res.status(404).json({
+                error: 'Product NOT found',
+            });
+        }
+
+        await dynamoDB.delete({
+            TableName: process.env.PRODUCTS_TABLE,
+            Key: {id},
+        });
+
+        res.status(200).json({
+            message: 'Product is deleted successfully!',
+            deletedProduct: existingProduct.Item,
+        });
+
+
+    } catch (error){
+        console.error('Error deleting Product', error);
+        res.status(500).json({
+            error: 'Error deleting product',
+            details: error.message
+        });
+    }
 }

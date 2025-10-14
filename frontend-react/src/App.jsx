@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Container, Grid, Paper, Typography } from '@mui/material';
+import { Box, Container, Grid, Typography } from '@mui/material';
+import ProductCard from './components/ProductCard.jsx'
 
 function App () {
 
@@ -43,13 +44,8 @@ const [products, setProducts] = useState(
         <Grid container spacing={4}>
           {products.map(product => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
-              <Paper sx={{p: 3}}>
-                <Typography variant="h6">{product.name}</Typography>
-                <Typography color="text.secondary">{product.description}</Typography>
-                <Typography variant="h6" color="primary">Price: {product.price}</Typography>
-                <Typography>Quantity: {product.quantity}</Typography>
-              </Paper>
-            </Grid>
+              <ProductCard product={product}/>
+            </Grid> 
           ))}
         </Grid>
       </Container>

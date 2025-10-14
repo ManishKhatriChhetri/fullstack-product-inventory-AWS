@@ -40,7 +40,6 @@ const [products, setProducts] = useState(
       </Box>
       
       <Container sx={{mt: 4}} maxWidth="lg">
-        <Typography>Products will appear here</Typography>
         <Grid container spacing={4}>
           {products.map(product => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>

@@ -12,7 +12,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-function ProductCard ({product, onEdit, onDelete}) {
+const ProductCard = ({product, onEdit, onDelete}) => {
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {

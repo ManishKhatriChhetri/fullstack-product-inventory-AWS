@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Container, Grid, Typography, Fab } from '@mui/material';
 import ProductCard from './components/ProductCard.jsx'
+import ProductDialog from './components/ProductDialog.jsx'
 import AddIcon from '@mui/icons-material/Add';
 
 function App () {
@@ -27,6 +28,8 @@ function App () {
       }
     ]);
 
+  const [productDialog, setProductDialog] = useState(false);
+
   //Handler functions  
   const handleEdit = (product) => {
     alert(`Editing: ${product.name} `);
@@ -40,7 +43,7 @@ function App () {
   }
 
   const handleAdd = () => {
-    alert("Add button is clicked");
+    setProductDialog(true);
   }
 
   return (
@@ -81,7 +84,13 @@ function App () {
       >
           <AddIcon />
       </Fab>
-
+      
+      {productDialog && 
+        <ProductDialog 
+          open={productDialog}
+        />
+      }
+      
     </Box>
   )
 }

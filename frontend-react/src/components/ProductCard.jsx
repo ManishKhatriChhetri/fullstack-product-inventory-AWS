@@ -12,7 +12,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-function ProductCard ({product}) {
+function ProductCard ({product, onEdit, onDelete}) {
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {
@@ -63,8 +63,8 @@ function ProductCard ({product}) {
             </CardContent>
 
             <CardActions sx={{justifyContent: 'space-between', px: 2, pb: 2}}>
-                <Button onClick={()=> {alert('Edit button clicked')}} startIcon={<EditIcon />} variant="outlined" size="small" color="success">Edit</Button>
-                <Button onClick={()=> {alert('Delete button clicked')}} startIcon={<DeleteIcon />} variant="outlined" size="small" color="error">Delete</Button>
+                <Button onClick={()=> onEdit(product)} startIcon={<EditIcon />} variant="outlined" size="small" color="success">Edit</Button>
+                <Button onClick={()=> onDelete(product, product.id) } startIcon={<DeleteIcon />} variant="outlined" size="small" color="error">Delete</Button>
             </CardActions>
         </Card>
     );

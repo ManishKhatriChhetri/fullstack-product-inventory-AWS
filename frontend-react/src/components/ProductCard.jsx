@@ -6,7 +6,7 @@ import {
     CardContent,
     Chip,
     CardActions,
-    Button
+    Button,
 } from '@mui/material'
 import InventoryIcon from '@mui/icons-material/Inventory';
 import EditIcon from '@mui/icons-material/Edit';

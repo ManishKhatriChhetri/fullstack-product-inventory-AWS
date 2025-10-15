@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Container, Grid, Typography } from '@mui/material';
+import { Box, Container, Grid, Typography, Fab } from '@mui/material';
 import ProductCard from './components/ProductCard.jsx'
+import AddIcon from '@mui/icons-material/Add';
 
 function App () {
 
@@ -36,7 +37,10 @@ function App () {
        alert(`Deleting: ${product.name} `);
        setProducts(products.filter(p => p.id !== id));
     }
-    
+  }
+
+  const handleAdd = () => {
+    alert("Add button is clicked");
   }
 
   return (
@@ -65,6 +69,19 @@ function App () {
           ))}
         </Grid>
       </Container>
+
+      <Fab 
+        color="primary"
+        sx={{
+          position: 'fixed',
+          bottom: 50,
+          right: 50
+        }}
+        onClick={handleAdd}
+      >
+          <AddIcon />
+      </Fab>
+
     </Box>
   )
 }

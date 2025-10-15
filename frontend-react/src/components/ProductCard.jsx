@@ -4,9 +4,13 @@ import {
     Box,
     Card,
     CardContent,
-    Chip
+    Chip,
+    CardActions,
+    Button
 } from '@mui/material'
 import InventoryIcon from '@mui/icons-material/Inventory';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function ProductCard ({product}) {
 
@@ -40,10 +44,10 @@ function ProductCard ({product}) {
                 {/* Add Inventory Icon and Status Chip */}
                 <Box display='flex' justifyContent="space-between" mb={2}>
                     <InventoryIcon color="primary" sx={{fontSize: 40}}/>
-                    <Chip>
+                    <Chip
                         label = {stockStatus.label}
                         color = {stockStatus.color}
-                        size = "small"
+                        size = "small" >
                     </Chip>
                 </Box>
 
@@ -57,6 +61,11 @@ function ProductCard ({product}) {
                     <Typography variant='body2'>SKU: {product.sku}</Typography>
                 </Box>
             </CardContent>
+
+            <CardActions sx={{justifyContent: 'space-between', px: 2, pb: 2}}>
+                <Button onClick={()=> {alert('Edit button clicked')}} startIcon={<EditIcon />} variant="outlined" size="small" color="success">Edit</Button>
+                <Button onClick={()=> {alert('Delete button clicked')}} startIcon={<DeleteIcon />} variant="outlined" size="small" color="error">Delete</Button>
+            </CardActions>
         </Card>
     );
 }

@@ -46,6 +46,16 @@ function App () {
     setProductDialog(true);
   }
 
+  const handleCreateProduct = (productData) => {
+    const newProduct = {
+      ...productData,
+      id: Date.now(),
+      price: parseFloat(productData.price),
+      quantity: parseInt(productData.quantity)
+    }
+    setProducts([newProduct, ...products]);
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
       <Box sx={{ bgcolor: 'primary.main', color: 'white', py: 4 }}>
@@ -88,6 +98,8 @@ function App () {
       {productDialog && 
         <ProductDialog 
           open={productDialog}
+          onClose={() => setProductDialog(false)}
+          onSubmit={handleCreateProduct}
         />
       }
       

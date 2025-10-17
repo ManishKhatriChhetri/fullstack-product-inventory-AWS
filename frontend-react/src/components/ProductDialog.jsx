@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -10,19 +10,52 @@ import {
 
 } from '@mui/material'
 
-const ProductDialog = ({open}) => {
+const ProductDialog = ({open, onClose, onSubmit}) => {
+
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+        price: '',
+        quantity: '',
+        category: 'General',
+        sku: ''
+    })
+
+    const handleChange = (e) => {
+        const {name, value} = e.target;
+        setFormData((prev)=> ({
+            ...prev,
+            [name] : value
+        }));
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSubmit(formData);
+        //Reset Form
+        setFormData({
+            name: '',
+            description: '',
+            price: '',
+            quantity: '',
+            category: 'General',
+            sku: ''
+        });
+    }
+
     return (
-        <Dialog open={open} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>Add New Product</DialogTitle>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <DialogContent>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField 
-                                
                                 label="Product Name"
                                 name="name"
+                                value={formData.name}
                                 variant="outlined"
+                                onChange={handleChange}
                                 required
                             />
                         </Grid>
@@ -31,7 +64,11 @@ const ProductDialog = ({open}) => {
                             <TextField 
                                 label="Description"
                                 name="description"
+                                value={formData.description}
+                                onChange={handleChange}
                                 variant="outlined"
+                                multiline
+
                             />
                         </Grid>
 
@@ -39,7 +76,9 @@ const ProductDialog = ({open}) => {
                             <TextField 
                                 label="Price"
                                 name="price"
+                                value={formData.price}
                                 variant="outlined"
+                                onChange={handleChange}
                                 required
                             />
                         </Grid>
@@ -48,6 +87,8 @@ const ProductDialog = ({open}) => {
                             <TextField 
                                 label="Quantity"
                                 name="quantity"
+                                value={formData.quantity}
+                                onChange={handleChange}
                                 variant="outlined"
                                 required
                             />
@@ -55,7 +96,7 @@ const ProductDialog = ({open}) => {
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>
-                    <Button>Cancel</Button>
+                    <Button onClick={onClose}>Cancel</Button>
                     <Button type="submit" variant="contained">Create</Button>
                 </DialogActions>
             </form>

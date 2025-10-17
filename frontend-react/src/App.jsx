@@ -32,31 +32,43 @@ function App () {
     }
   }
 
+  //Create product function
+  const handleCreateProduct = async (productData) => {
+    try {
+      const response = await axios.post(`${API_URL}/products`, productData);
+      console.log(response.data);
+      setProducts([response.data.product, ...products]);
+      setProductDialog(false);
+    } catch (error) {
+        console.error("Error creating product: ", error);
+        alert("Error creating product");
+    }
+  }
+
+  const handleDelete = async (product, id) => {
+    if(window.confirm('Are you sure you want to delete the product?')) {
+      try {
+        await axios.delete(`${API_URL}/products/${id}`)
+        setProducts(products.filter(p => p.id !== id));
+        alert("Product is deleted")
+      } catch (error) {
+          console.error("Error deleting product: ", error);
+          alert("Error deleting product");
+      }
+    }
+  }
+
   //Handler functions  
   const handleEdit = (product) => {
     alert(`Editing: ${product.name} `);
-  }
 
-  const handleDelete = (product, id) => {
-    if(window.confirm('Are you sure you want to delete?')) {
-       alert(`Deleting: ${product.name} `);
-       setProducts(products.filter(p => p.id !== id));
-    }
   }
 
   const handleAdd = () => {
     setProductDialog(true);
   }
 
-  const handleCreateProduct = (productData) => {
-    const newProduct = {
-      ...productData,
-      id: Date.now(),
-      price: parseFloat(productData.price),
-      quantity: parseInt(productData.quantity)
-    }
-    setProducts([newProduct, ...products]);
-  }
+  
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>

@@ -1,34 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Container, Grid, Typography, Fab } from '@mui/material';
+import { Box, Container, Grid, Typography, Fab, CircularProgress, Paper, Button } from '@mui/material';
 import ProductCard from './components/ProductCard.jsx'
 import ProductDialog from './components/ProductDialog.jsx'
 import AddIcon from '@mui/icons-material/Add';
 
 function App () {
 
-  const [products, setProducts] = useState(
-    [
-      {
-        id: 1,
-        name: 'Laptop',
-        description: 'HP Laptop',
-        price: 1099.99,
-        quantity: 2,
-        category: 'Electronics',
-        sku: 'LAP01'
-      },
-      {
-        id: 2,
-        name: 'Mobile',
-        description: 'Iphone 16 pro max',
-        price: 1199.99,
-        quantity: 3,
-        category: 'Electronics',
-        sku: 'MOB01'
-      }
-    ]);
-
+  const [products, setProducts] = useState([]);
   const [productDialog, setProductDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   //Handler functions  
   const handleEdit = (product) => {
@@ -70,7 +50,28 @@ function App () {
       </Box>
       
       <Container sx={{mt: 4}} maxWidth="lg">
-        <Grid container spacing={4}>
+        {loading ? (
+          <Box display="flex" justifyContent="center">
+            <CircularProgress size={30}/>
+          </Box>
+        ): products.length === 0 ? (
+          <Paper sx={{p: 8, textAlign: 'center'}}>
+            <Typography variant='h5' gutterBottom color="text.secondary">
+              No Products Yet
+            </Typography>
+            <Typography variant='body1' color="text.secondary" mb={3}>
+              Please add your first product
+            </Typography>
+            <Button 
+              variant='contained'
+              size='large'
+              startIcon={<AddIcon />}
+              onClick={()=> setProductDialog(true)}>
+              Add Product
+            </Button>
+          </Paper>
+        ) : (
+          <Grid container spacing={4}>
           {products.map(product => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
               <ProductCard 
@@ -81,6 +82,8 @@ function App () {
             </Grid> 
           ))}
         </Grid>
+        )}
+
       </Container>
 
       <Fab 

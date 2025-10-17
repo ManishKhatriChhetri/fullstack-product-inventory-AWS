@@ -1,14 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Container, Grid, Typography, Fab, CircularProgress, Paper, Button } from '@mui/material';
 import ProductCard from './components/ProductCard.jsx'
 import ProductDialog from './components/ProductDialog.jsx'
 import AddIcon from '@mui/icons-material/Add';
+import axios from 'axios';
 
 function App () {
 
   const [products, setProducts] = useState([]);
   const [productDialog, setProductDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const API_URL = "https://5iuovjt7z2.execute-api.us-east-1.amazonaws.com";
+
+  //Add useEffect to fetch products on load
+  useEffect(()=> {
+    getProducts();
+  }, []);
+
+  //Get all products function
+  const getProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/products`);
+      console.log("Response data: ", response.data);
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      alert("Error fetching products");
+    } finally {
+        setLoading(false);
+    }
+  }
 
   //Handler functions  
   const handleEdit = (product) => {

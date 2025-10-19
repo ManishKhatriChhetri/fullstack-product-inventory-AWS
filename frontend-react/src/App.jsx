@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Grid, Typography, Fab, CircularProgress, Paper, Button } from '@mui/material';
+import { Box, Container, Grid, Typography, Fab, CircularProgress, Paper, Button, Snackbar, Alert } from '@mui/material';
 import ProductCard from './components/ProductCard.jsx'
 import ProductDialog from './components/ProductDialog.jsx'
 import AddIcon from '@mui/icons-material/Add';
@@ -10,12 +10,23 @@ function App () {
   const [products, setProducts] = useState([]);
   const [productDialog, setProductDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState(
+    {
+      open: false,
+      message: '',
+      severity: 'success',
+    }
+  );
   const API_URL = "https://5iuovjt7z2.execute-api.us-east-1.amazonaws.com";
 
   //Add useEffect to fetch products on load
   useEffect(()=> {
     getProducts();
   }, []);
+
+  const showSnackBar = (message, severity='success') => {
+    setSnackbar({open: true, message, severity});
+  };
 
   //Get all products function
   const getProducts = async () => {
@@ -25,8 +36,7 @@ function App () {
       console.log("Response data: ", response.data);
       setProducts(response.data.products || []);
     } catch (error) {
-      console.error("Error fetching products:", error);
-      alert("Error fetching products");
+        showSnackBar('Error fetching products', 'error');
     } finally {
         setLoading(false);
     }
@@ -36,12 +46,11 @@ function App () {
   const handleCreateProduct = async (productData) => {
     try {
       const response = await axios.post(`${API_URL}/products`, productData);
-      console.log(response.data);
       setProducts([response.data.product, ...products]);
       setProductDialog(false);
+      showSnackBar('Product created successfully!');
     } catch (error) {
-        console.error("Error creating product: ", error);
-        alert("Error creating product");
+        showSnackBar('Error creating products', 'error');
     }
   }
 
@@ -50,10 +59,9 @@ function App () {
       try {
         await axios.delete(`${API_URL}/products/${id}`)
         setProducts(products.filter(p => p.id !== id));
-        alert("Product is deleted")
+        showSnackBar('Product deleted successfully!');
       } catch (error) {
-          console.error("Error deleting product: ", error);
-          alert("Error deleting product");
+          showSnackBar('Error deleting product', 'error');
       }
     }
   }
@@ -140,6 +148,17 @@ function App () {
         />
       }
       
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={()=> setSnackbar({...snackbar, open: false})}
+      >
+        <Alert
+          severity={snackbar.severity} 
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

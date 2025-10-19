@@ -6,7 +6,8 @@ import {
     DialogActions,
     Grid,
     TextField,
-    Button
+    Button,
+    MenuItem,
 
 } from '@mui/material'
 
@@ -22,6 +23,20 @@ const ProductDialog = ({open, onClose, onSubmit, product}) => {
         category: 'General',
         sku: ''
     })
+
+    const categories = [
+        'Electronics',
+        'Clothing',
+        'Food & Beverage',
+        'Home & Garden',
+        'Sports & Outdoors',
+        'Books',
+        'Toys & Games',
+        'Health & Beauty',
+        'Automotive',
+        'Office Supplies',
+        'General',
+    ]
 
     useEffect(() => {
         if (product) {
@@ -65,6 +80,8 @@ const ProductDialog = ({open, onClose, onSubmit, product}) => {
             newErrors.quantity = "Quantity cannot be negative";
         } else if (isNaN(formData.quantity)) {
             newErrors.quantity = "Quantity must be a number";
+        } else if (!Number.isInteger(parseFloat(formData.quantity))) {
+            newErrors.quantity = "Quantity must be a whole number";
         }
 
         if(formData.sku && formData.sku.length < 3) {
@@ -150,6 +167,37 @@ const ProductDialog = ({open, onClose, onSubmit, product}) => {
                                 helperText={errors.quantity}
                             />
                         </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                            <TextField 
+                                fullWidth
+                                select
+                                label="Category"
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                required
+                            >
+                                {categories.map(
+                                    (category) => (
+                                        <MenuItem key={category} value={category}>{category}</MenuItem>
+                                    )
+                                )}
+                            </TextField>    
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="SKU (Stock Keeping Unit)"
+                                name="sku"
+                                value={formData.sku}
+                                onChange={handleChange}
+                                error={!!errors.sku}
+                                helperText={errors.sku}
+                            />
+                        </Grid>
+
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>

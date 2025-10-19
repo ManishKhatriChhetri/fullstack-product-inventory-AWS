@@ -18,7 +18,8 @@ function App () {
       severity: 'success',
     }
   );
-  const API_URL = "https://5iuovjt7z2.execute-api.us-east-1.amazonaws.com";
+  
+  const API_URL = process.env.REACT_APP_API_URL;
 
   //Add useEffect to fetch products on load
   useEffect(()=> {

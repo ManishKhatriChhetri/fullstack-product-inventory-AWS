@@ -1,0 +1,42 @@
+name: Deploy Product Inventory Manager Frontend to Netlify
+
+on: # Triggers on
+  push:
+    branches: [master]
+    paths:
+      - 'frontend-react/**'
+      - '.github/workflows/deploy-frontend.yml'
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps: # List of individual tasks to perform in sequence
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.jobs
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend-react
+        run: npm ci
+
+      - name: Build React app
+        working-directory: ./frontend-react
+        env:
+          REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL}}
+        RUN: npm run build
+
+      - name: Deploy to Netlify
+        uses: netlify/actions/cli@master
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        with:
+          args: deploy --dir=frontend-react/build --prod

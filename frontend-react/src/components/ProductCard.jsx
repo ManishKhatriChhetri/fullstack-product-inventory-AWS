@@ -64,7 +64,7 @@ const ProductCard = ({product, onEdit, onDelete}) => {
 
             <CardActions sx={{justifyContent: 'space-between', px: 2, pb: 2}}>
                 <Button onClick={()=> onEdit(product)} startIcon={<EditIcon />} variant="outlined" size="small" color="success">Edit</Button>
-                <Button onClick={()=> onDelete(product, product.id) } startIcon={<DeleteIcon />} variant="outlined" size="small" color="error">Delete</Button>
+                <Button onClick={()=> onDelete(product.id) } startIcon={<DeleteIcon />} variant="outlined" size="small" color="error">Delete</Button>
             </CardActions>
         </Card>
     );

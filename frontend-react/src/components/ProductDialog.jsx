@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -10,7 +10,7 @@ import {
 
 } from '@mui/material'
 
-const ProductDialog = ({open, onClose, onSubmit}) => {
+const ProductDialog = ({open, onClose, onSubmit, product}) => {
 
     const [formData, setFormData] = useState({
         name: '',
@@ -20,6 +20,28 @@ const ProductDialog = ({open, onClose, onSubmit}) => {
         category: 'General',
         sku: ''
     })
+
+    useEffect(() => {
+        if (product) {
+            setFormData({
+                name: product.name || '',
+                description: product.description || '',
+                price: product.price || '',
+                quantity: product.quantity || '',
+                category: product.category || 'General',
+                sku: product.sku || '',
+            });
+        } else {
+            setFormData({
+                name: '',
+                description: '',
+                price: '',
+                quantity: '',
+                category: 'General',
+                sku: '',
+            });
+        }
+  }, [product, open]);
 
     const handleChange = (e) => {
         const {name, value} = e.target;

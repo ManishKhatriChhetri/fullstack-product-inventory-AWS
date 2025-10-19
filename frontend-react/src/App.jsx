@@ -10,6 +10,7 @@ function App () {
   const [products, setProducts] = useState([]);
   const [productDialog, setProductDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [snackbar, setSnackbar] = useState(
     {
       open: false,
@@ -54,7 +55,7 @@ function App () {
     }
   }
 
-  const handleDelete = async (product, id) => {
+  const handleDelete = async (id) => {
     if(window.confirm('Are you sure you want to delete the product?')) {
       try {
         await axios.delete(`${API_URL}/products/${id}`)
@@ -66,17 +67,28 @@ function App () {
     }
   }
 
+  const handleUpdateProduct = async (productData) => {
+    try {
+      const response = await axios.put(`${API_URL}/products/${editingProduct.id}`, productData);
+      setProducts(products.map(p => p.id === editingProduct.id? response.data.product : p));
+      setProductDialog(false);
+      setEditingProduct(null);
+      showSnackBar('Product edited successfully!');
+    } catch (error) {
+        showSnackBar('Error updating product', 'error');
+    }
+  }
+
   //Handler functions  
   const handleEdit = (product) => {
-    alert(`Editing: ${product.name} `);
-
+    setEditingProduct(product);
+    setProductDialog(true);
   }
 
   const handleAdd = () => {
     setProductDialog(true);
+    setEditingProduct(null);
   }
-
-  
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
@@ -144,7 +156,8 @@ function App () {
         <ProductDialog 
           open={productDialog}
           onClose={() => setProductDialog(false)}
-          onSubmit={handleCreateProduct}
+          onSubmit={editingProduct ? handleUpdateProduct : handleCreateProduct}
+          product={editingProduct}
         />
       }
       

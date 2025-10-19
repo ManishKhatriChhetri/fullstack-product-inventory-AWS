@@ -12,6 +12,8 @@ import {
 
 const ProductDialog = ({open, onClose, onSubmit, product}) => {
 
+    //Add error state
+    const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -41,7 +43,38 @@ const ProductDialog = ({open, onClose, onSubmit, product}) => {
                 sku: '',
             });
         }
-  }, [product, open]);
+        setErrors({});
+    }, [product, open]);
+
+    //Add validation function
+    const validate = () => {
+        const newErrors = {};
+        if(!formData.name.trim()) {
+            newErrors.name = "Product name is required";
+        } else if (formData.name.length < 3) {
+            newErrors.name = "Product name must be at least 3 characters";
+        }
+
+        if(!formData.price || parseFloat(formData.price) <=0) {
+            newErrors.price = "Price must be greater than 0";
+        } else if (isNaN(formData.price)) {
+            newErrors.price = "Price must be a number";
+        }
+
+        if(!formData.quantity || parseInt(formData.quantity) < 0) {
+            newErrors.quantity = "Quantity cannot be negative";
+        } else if (isNaN(formData.quantity)) {
+            newErrors.quantity = "Quantity must be a number";
+        }
+
+        if(formData.sku && formData.sku.length < 3) {
+            newErrors.sku = "SKU must be at least 3 characters";
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    }
 
     const handleChange = (e) => {
         const {name, value} = e.target;
@@ -53,73 +86,75 @@ const ProductDialog = ({open, onClose, onSubmit, product}) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
-        //Reset Form
-        setFormData({
-            name: '',
-            description: '',
-            price: '',
-            quantity: '',
-            category: 'General',
-            sku: ''
-        });
+        if(validate()) {
+            onSubmit(formData);
+        }
     }
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle>Add New Product</DialogTitle>
+            <DialogTitle>{product? 'Edit Product' : 'Add New Product'}</DialogTitle>
             <form onSubmit={handleSubmit}>
                 <DialogContent>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField 
+                                fullWidth
                                 label="Product Name"
                                 name="name"
                                 value={formData.name}
                                 variant="outlined"
                                 onChange={handleChange}
                                 required
+                                error={!!errors.name}
+                                helperText={errors.name}
                             />
                         </Grid>
 
                         <Grid item xs={12}>
                             <TextField 
+                                fullWidth
                                 label="Description"
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
                                 variant="outlined"
                                 multiline
-
                             />
                         </Grid>
 
                         <Grid item xs={12} sm={6}>
                             <TextField 
+                                fullWidth
                                 label="Price"
                                 name="price"
                                 value={formData.price}
                                 variant="outlined"
                                 onChange={handleChange}
                                 required
+                                error={!!errors.price}
+                                helperText={errors.price}
                             />
                         </Grid>
 
                         <Grid item xs={12} sm={6}>
                             <TextField 
+                                fullWidth
                                 label="Quantity"
                                 name="quantity"
                                 value={formData.quantity}
                                 onChange={handleChange}
                                 variant="outlined"
                                 required
+                                error={!!errors.quantity}
+                                helperText={errors.quantity}
                             />
                         </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>
                     <Button onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="contained">Create</Button>
+                    <Button type="submit" variant="contained">{product? 'Update' : 'Create'}</Button>
                 </DialogActions>
             </form>
         </Dialog>

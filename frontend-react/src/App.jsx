@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Container, Grid, Typography, Fab, CircularProgress, Paper, Button, Snackbar, Alert } from '@mui/material';
 import ProductCard from './components/ProductCard.jsx'
 import ProductDialog from './components/ProductDialog.jsx'
@@ -24,14 +24,14 @@ function App () {
   //Add useEffect to fetch products on load
   useEffect(()=> {
     getProducts();
-  }, []);
+  }, [getProducts]);
 
   const showSnackBar = (message, severity='success') => {
     setSnackbar({open: true, message, severity});
   };
 
   //Get all products function
-  const getProducts = async () => {
+  const getProducts = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/products`);
@@ -42,7 +42,7 @@ function App () {
     } finally {
         setLoading(false);
     }
-  }
+  }, [API_URL]); //Add API_URL as dependency
 
   //Create product function
   const handleCreateProduct = async (productData) => {

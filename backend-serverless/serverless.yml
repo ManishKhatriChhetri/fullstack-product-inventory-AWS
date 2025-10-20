@@ -31,6 +31,7 @@ provider:
     cors:
       allowedOrigins:
         - https://product-inventory-manager-mkbc.netlify.app/
+        - https://dev-product-inventory-manager-mkbc.netlify.app/
         - http://localhost:3000/
       allowedHeaders:
         - Content-Type

@@ -23,7 +23,7 @@ jobs:
           cache-dependency-path: backend-serverless/package-lock.json
 
       - name: Install dependencies
-        workingidirectory: ./backend-serverless
+        working-directory: ./backend-serverless
         run: npm ci
 
       - name: Install Serverless Framework

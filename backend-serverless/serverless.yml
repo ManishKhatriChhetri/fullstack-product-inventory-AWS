@@ -27,6 +27,21 @@ provider:
           Resource:
             - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}
 
+  httpApi:
+    cors:
+      allowedOrigins:
+        - https://product-inventory-manager-mkbc.netlify.app/
+        - http://localhost:3000/
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - Get
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+
 functions:
   api:
     handler: src/index.handler

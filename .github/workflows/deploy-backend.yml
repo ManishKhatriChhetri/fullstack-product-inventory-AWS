@@ -1,0 +1,54 @@
+name: Deploy backend to AWS Lambda
+
+on:
+  push:
+    branches: [master, dev]
+    paths:
+      - 'backend-serverless/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup node.json
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend-serverless/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./backend-serverless
+        run: npm ci
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless@3
+
+      - name: Deploy to Dev Stage
+        if: github.ref == 'refs/heads/dev'
+        working-directory: ./backend-serverless
+        env: 
+          SERVERLESS_ACCESS_KEY:  ${{secrets.SERVERLESS_ACCESS_KEY}}
+        run: |
+          echo "Deploying to DEV environment..."
+          serverless deploy --stage dev --verbose
+
+      - name: Deploy to Production Stage
+        if: github.ref == 'refs/heads/master'
+        working-directory: ./backend-serverless
+        env: 
+          SERVERLESS_ACCESS_KEY:  ${{secrets.SERVERLESS_ACCESS_KEY}}
+        run: |
+          echo "Deploying to PRODUCTION environment..."
+          serverless deploy --stage prod --verbose
+
+      - name: Display Deployment Info
+        run: |
+          echo "Deployment completed successfully!"
+          echo "Branch: ${{ github.ref }}"
+          echo "Stage: ${{ github.ref == 'refs/heads/master' && 'prod' || 'dev' }}"

@@ -21,15 +21,6 @@ function App () {
   
   const API_URL = process.env.REACT_APP_API_URL;
 
-  //Add useEffect to fetch products on load
-  useEffect(()=> {
-    getProducts();
-  }, [getProducts]);
-
-  const showSnackBar = (message, severity='success') => {
-    setSnackbar({open: true, message, severity});
-  };
-
   //Get all products function
   const getProducts = useCallback(async () => {
     setLoading(true);
@@ -43,6 +34,15 @@ function App () {
         setLoading(false);
     }
   }, [API_URL]); //Add API_URL as dependency
+
+  //Add useEffect to fetch products on load
+  useEffect(()=> {
+    getProducts();
+  }, [getProducts]);
+
+  const showSnackBar = (message, severity='success') => {
+    setSnackbar({open: true, message, severity});
+  };
 
   //Create product function
   const handleCreateProduct = async (productData) => {

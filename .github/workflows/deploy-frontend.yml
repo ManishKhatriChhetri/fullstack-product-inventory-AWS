@@ -31,7 +31,7 @@ jobs:
         working-directory: ./frontend-react
         env:
           REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL}}
-        RUN: npm run build
+        run: npm run build
 
       - name: Deploy to Netlify
         uses: netlify/actions/cli@master

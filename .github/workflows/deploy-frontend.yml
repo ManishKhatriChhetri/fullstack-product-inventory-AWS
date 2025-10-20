@@ -31,7 +31,7 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         working-directory: ./frontend-react
         env:
-          REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL}}
+          REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL_DEV}}
         run: |
           echo "Building for DEV environment..."
           npm run build
@@ -40,7 +40,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         working-directory: ./frontend-react
         env:
-          REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL}}
+          REACT_APP_API_URL: ${{secrets.REACT_APP_API_URL_PROD}}
         run: |
           echo "Building for PRODUCTION environment..."
           npm run build
@@ -50,7 +50,7 @@ jobs:
         uses: netlify/actions/cli@master
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_DEV }}
         with:
           args: deploy --dir=frontend-react/build --prod
 
@@ -59,7 +59,7 @@ jobs:
         uses: netlify/actions/cli@master
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_PROD }}
         with:
           args: deploy --dir=frontend-react/build --prod
 
